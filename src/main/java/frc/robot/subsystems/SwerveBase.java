@@ -24,17 +24,20 @@ public class SwerveBase extends SubsystemBase {
         driveMotors = new WPI_TalonFX[4];
         turnMotors = new WPI_TalonFX[4];
 
+
+
         for(int i = 0; i < 4; i++) {
             driveMotors[i] = new WPI_TalonFX(SwerveConstants.driveMotors[i]);
             turnMotors[i] = new WPI_TalonFX(SwerveConstants.turnMotors[i]);
+
             driveMotors[i].configFactoryDefault();
             turnMotors[i].configFactoryDefault();
             driveMotors[i].configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 30);
             turnMotors[i].configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 30);
             driveMotors[i].selectProfileSlot(0, 0);
             turnMotors[i].selectProfileSlot(0, 0);
-            driveMotors[i].setNeutralMode(NeutralMode.Brake);
-            turnMotors[i].setNeutralMode(NeutralMode.Brake);
+            driveMotors[i].setNeutralMode(NeutralMode.Coast);
+            turnMotors[i].setNeutralMode(NeutralMode.Coast);
             driveMotors[i].config_kP(0, SwerveConstants.drive_kP);
             driveMotors[i].config_kI(0, SwerveConstants.drive_kI);
             turnMotors[i].config_kP(0, SwerveConstants.turn_kP);
@@ -60,11 +63,7 @@ public class SwerveBase extends SubsystemBase {
 
     @Override
     public void periodic() {
-//        for(int i = 0; i < 4; i++) {
-//            turnMotors[i].set(ControlMode.Velocity, 2048);
-//            System.out.print("Motor " + i + ": " + turnMotors[i].getSelectedSensorVelocity() + "  ");
-//        }
-//        System.out.println();
+        System.out.println(driveMotors[1].getSensorCollection().getIntegratedSensorAbsolutePosition() + "    " + driveMotors[1].getSensorCollection().getIntegratedSensorPosition());
     }
 
     public void driveSwerve(double xspeed, double yspeed, double zrot) {
@@ -73,13 +72,12 @@ public class SwerveBase extends SubsystemBase {
         for(int i = 0; i < 4; i++) {
             states[i] = SwerveModuleState.optimize(states[i],
                     Rotation2d.fromDegrees(turnMotors[i].getSelectedSensorPosition() * SwerveConstants.MTTD));
-            System.out.println("Moduel " + i + " speed: " +
-                    (states[i].speedMetersPerSecond / SwerveConstants.MTP100MSTMPS) + ", Angle: " +
-                    (states[i].angle.getDegrees() / SwerveConstants.MTTD));
+            System.out.println("Module " + i + ": " + states[i].speedMetersPerSecond + "Angle: " + states[i].angle.getDegrees());
 //            driveMotors[i].set(ControlMode.Velocity, 2048);
 //            turnMotors[i].set(ControlMode.PercentOutput, yspeed / 4);
             driveMotors[i].set(ControlMode.Velocity, (states[i].speedMetersPerSecond / SwerveConstants.MTP100MSTMPS));
             turnMotors[i].set(ControlMode.Position, states[i].angle.getDegrees() / SwerveConstants.MTTD);
         }
+        System.out.println();
     }
 }
